@@ -1,11 +1,16 @@
 class Context {
 	static isNeedToInject() {
-		return !!document.querySelector('.video-chat');
+		return !!document.querySelector('.video-chat') || !!document.querySelector('.chat-list');
 	}
 
 	main() {
-		this.mainEl = document.querySelector('.video-chat');
+		this.mainEl = document.querySelector('.video-chat') || document.querySelector('.chat-list');
+		this.isLive = !!document.querySelector('.chat-list');
+		this.selectors = {
+			messageMain: this.isLive ? 'div[data-a-target="chat-line-message"]' : 'div[data-test-selector="message-layout"]'
+		};
 
+		this.messageParser = new MessageParser(this);
 		this.menuHandler = new MenuHandler(this);
 		this.filterHandler = new FilterHandler(this);
 		this.observer = new Observer(this);
@@ -20,12 +25,12 @@ class MenuHandler {
 	}
 
 	onClickedAny(event) {
-		let messageRow = $(event.target).parents('div[data-test-selector="message-layout"]').get(0);
+		let messageRow = $(event.target).parents(this.context.selectors.messageMain).get(0);
 		if (!messageRow) {
 			return;
 		}
 
-		let message = MessageParser.parse(messageRow);
+		let message = this.context.messageParser.parse(messageRow);
 		if (!message) {
 			return;
 		}
@@ -141,20 +146,30 @@ class Observer {
 
 	onChildNodeChanged(mutationsList) {
 		for (let mutation of mutationsList) {
-			if (mutation.type === 'childList' && mutation.target.nodeName === 'UL') {
+			if (mutation.type === 'childList' && (mutation.target.nodeName === 'UL' || mutation.target.nodeName === 'DIV')) {
 				mutation.addedNodes.forEach(this.onNodeAdded.bind(this));
 			}
 		}
 	}
 
 	onNodeAdded(listDom) {
-		let messageRow = listDom.querySelector('div[data-test-selector="message-layout"]');
-		if (!messageRow) {
-			return;
+		let messageRow;
+
+		if (this.context.isLive) {
+			if ($(listDom).attr('data-a-target') !== 'chat-line-message') {
+				return;
+			}
+			messageRow = listDom;
+		} else {
+			messageRow = listDom.querySelector(this.context.selectors.messageMain);
+
+			if (!messageRow) {
+				return;
+			}
 		}
 
 		setTimeout(() => {
-			let message = MessageParser.parse(messageRow);
+			let message = this.context.messageParser.parse(messageRow);
 			if (!message) {
 				return;
 			}
@@ -165,20 +180,16 @@ class Observer {
 };
 
 class MessageParser {
-	// div[data-test-selector="message-layout"]
-	static parse(messageDom) {
-		let parser = new MessageParser(messageDom);
-		return parser.get();
+	constructor(context) {
+		this.context = context;
 	}
 
-	constructor(messageDom) {
+	parse(messageDom) {
 		this.dom = messageDom;
 
 		this.result = new Message();
 		this.isGood = this.parseUser() && this.parseMsg();
-	}
 
-	get() {
 		return this.isGood ? this.result : null;
 	}
 
@@ -199,7 +210,7 @@ class MessageParser {
 	}
 
 	parseMsg() {
-		let msgDom = this.dom.querySelector('div[data-test-selector="comment-message-selector"] .qa-mod-message');
+		let msgDom = this.context.isLive ? this.dom : this.dom.querySelector('div[data-test-selector="comment-message-selector"] .qa-mod-message');
 		if (!msgDom) {
 			return false;
 		}
@@ -221,7 +232,15 @@ class MessageParser {
 
 	parseMsgSpan(span) {
 		let $span = $(span);
-		if ($span.attr('data-a-target') === 'emote-name') {
+		let target = $span.attr('data-a-target');
+
+		if (this.context.isLive) {
+			if (target !== 'emote-name' && target !== 'chat-message-text') {
+				return '';
+			}
+		}
+
+		if (target === 'emote-name') {
 			return $span.children().eq(0).attr('alt');
 		} else {
 			return $span.text();
