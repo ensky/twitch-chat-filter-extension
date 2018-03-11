@@ -1,0 +1,14 @@
+{
+  "productName": {
+    "message": "Twtich Chat Cleaner",
+    "description": ""
+  },
+  "description": {
+    "message": "Wanna get rid of twitch troll and harmful chat? Double click the chat message you wanna hide.",
+    "description": ""
+  },
+  "inject_prompt_message": {
+    "message": "I wanna hide chat message contains:",
+    "description": ""
+  }
+}

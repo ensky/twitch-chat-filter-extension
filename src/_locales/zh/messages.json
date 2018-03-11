@@ -1,0 +1,14 @@
+{
+  "productName": {
+    "message": "Twtich 聊天室清潔工",
+    "description": ""
+  },
+  "description": {
+    "message": "想逃離糟糕的 Twitch 聊天室生態?雙擊想隱藏的聊天室訊息，馬上幫你擋掉 :)",
+    "description": ""
+  },
+  "inject_prompt_message": {
+    "message": "我想要把包含以下文字的聊天藏起來:",
+    "description": ""
+  }
+}

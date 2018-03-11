@@ -1,0 +1,36 @@
+{
+  "name": "__MSG_productName__",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "__MSG_description__",
+  "homepage_url": "https://www.ensky.tw/",
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "options_page": "src/options_custom/index.html",
+  "permissions": [
+    "storage",
+    "https://www.twitch.tv/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "css": [
+        "src/inject/twitch.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "js": [
+        "src/lib/jquery-3.3.1.slim.min.js",
+        "src/inject/twitch.js"
+      ]
+    }
+  ]
+}
