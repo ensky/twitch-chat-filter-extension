@@ -92,7 +92,7 @@ class FilterHandler {
 
 	addFilter(message, filter = { user: true, message: true }) {
 		if (filter.user) {
-			this.blocks.users[message.user] = true;
+			this.blocks.users.add(message.user);
 		}
 
 		if (filter.message) {
@@ -125,7 +125,7 @@ class FilterHandler {
 	}
 
 	isFilteredByUser(message) {
-		return this.blocks.users[message.user] === true;
+		return this.blocks.users.has(message.user);
 	}
 
 	isFilteredByMessage(message) {
